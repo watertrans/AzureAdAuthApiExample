@@ -2,11 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.Identity.Web.Resource;
 
 namespace AzureAdAuthApiExample.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("[controller]")]
     public class WeatherForecastController : ControllerBase
@@ -18,6 +21,8 @@ namespace AzureAdAuthApiExample.Controllers
 
         private readonly ILogger<WeatherForecastController> _logger;
 
+        static readonly string[] scopeRequiredByApi = new string[] { "Read" };
+
         public WeatherForecastController(ILogger<WeatherForecastController> logger)
         {
             _logger = logger;
@@ -26,6 +31,8 @@ namespace AzureAdAuthApiExample.Controllers
         [HttpGet]
         public IEnumerable<WeatherForecast> Get()
         {
+            HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);
+
             var rng = new Random();
             return Enumerable.Range(1, 5).Select(index => new WeatherForecast
             {
